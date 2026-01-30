@@ -1,4 +1,4 @@
-1. PROJECT OVERVIEW
+1. **PROJECT OVERVIEW**
 System Name: College Course Portal
 Purpose: Basic platform for students to view/enroll in courses and admins to manage them
 Users: Students, Administrators
@@ -6,8 +6,8 @@ Scope: DBMS Lab Project - Basic Implementation
 
 
 
-2. SYSTEM ENTITIES
-2.1 STUDENT
+2. **SYSTEM ENTITIES**
+2.1 **STUDENT**
 Roll_No (Primary Key)
 Name
 Email (unique, college email only)
@@ -16,7 +16,7 @@ Department
 Semester
 Status (Pending/Approved/Blocked)
 
-2.2 COURSE
+2.2 **COURSE**
 Course_ID (Primary Key)
 Course_Name
 Credits
@@ -24,7 +24,7 @@ Department
 Semester
 Status (Active/Inactive)
 
-2.3 ADMIN
+2.3 **ADMIN**
 Admin_ID (Primary Key)
 Name
 Email (unique)
@@ -33,7 +33,7 @@ Department
 
 
 
-3. FUNCTIONAL REQUIREMENTS
+3. **FUNCTIONAL REQUIREMENTS**
 3.1 STUDENT FUNCTIONS
 Register using college email ID only
 Login only after admin approval
@@ -56,7 +56,7 @@ Approve or block student accounts
 
 
 
-4. NON-FUNCTIONAL REQUIREMENTS
+4. **NON-FUNCTIONAL REQUIREMENTS**
 4.1 Security Requirements
 Passwords must be stored in encrypted/hashed format
 Only authenticated users can access the system
@@ -82,7 +82,7 @@ Database constraints must ensure consistency of student and enrollment data
 
 
 
-5. USER INTERFACES
+5. **USER INTERFACES**
 5.1 STUDENT PAGES
 Registration Page
   Roll number, name, email, password, department, semester
