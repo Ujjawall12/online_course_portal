@@ -1,35 +1,35 @@
 1. **PROJECT OVERVIEW**
-System Name: College Course Portal
-Purpose: Basic platform for students to view/enroll in courses and admins to manage them
-Users: Students, Administrators
-Scope: DBMS Lab Project - Basic Implementation
+**System Name**: College Course Portal
+**Purpose**: Basic platform for students to view/enroll in courses and admins to manage them
+**Users**: Students, Administrators
+**Scope**: DBMS Lab Project - Basic Implementation
 
 
 
 2. **SYSTEM ENTITIES**
 2.1 **STUDENT**
-Roll_No (Primary Key)
-Name
-Email (unique, college email only)
-Password
-Department
-Semester
-Status (Pending/Approved/Blocked)
+**Roll_No** (Primary Key)
+**Name**
+**Email** (unique, college email only)
+**Password**
+**Department**
+**Semester**
+**Status** (Pending/Approved/Blocked)
 
 2.2 **COURSE**
-Course_ID (Primary Key)
-Course_Name
-Credits
-Department
-Semester
-Status (Active/Inactive)
+**Course_ID** (Primary Key)
+**Course_Name**
+**Credits**
+**Department**
+**Semester**
+**Status** (Active/Inactive)
 
 2.3 **ADMIN**
-Admin_ID (Primary Key)
-Name
-Email (unique)
-Password
-Department
+**Admin_ID** (Primary Key)
+**Name**
+**Email** (unique)
+**Password**
+**Department**
 
 
 
