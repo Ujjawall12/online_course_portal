@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { api } from '@/lib/api';
 
-type User = { id: number | string; name?: string; roll_no?: string; email: string; department?: string; semester?: number; cgpa?: number | null };
+type User = { id: number | string; name?: string; roll_no?: string; email: string; department?: string; semester?: number; cgpa?: number | null; status?: string };
 type AuthState = {
   user: User | null;
   role: 'student' | 'admin' | null;
