@@ -1,6 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
-import { useAuth } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { StudentLayout } from '@/components/StudentLayout';
 import { AdminLayout } from '@/components/AdminLayout';
@@ -9,13 +8,13 @@ import { Signup } from '@/pages/Signup';
 import { Dashboard } from '@/pages/Dashboard';
 import { AvailableCourses } from '@/pages/AvailableCourses';
 import { MyPreferences } from '@/pages/MyPreferences';
-import { AllotmentResult } from '@/pages/AllotmentResult';
+import { StudentAllotment } from '@/pages/StudentAllotment';
 import { MyEnrollments } from '@/pages/MyEnrollments';
 import { Profile } from '@/pages/Profile';
 import { AdminDashboard } from '@/pages/AdminDashboard';
 import { AdminStudents } from '@/pages/AdminStudents';
 import { AdminCourses } from '@/pages/AdminCourses';
-import { AdminAllotment } from '@/pages/AdminAllotment';
+import { AdminAllotmentManagement } from '@/pages/AdminAllotmentManagement';
 
 function ForgotPassword() {
   return (
@@ -23,17 +22,6 @@ function ForgotPassword() {
       <p className="text-muted-foreground">Forgot password – Phase 2.</p>
     </div>
   );
-}
-
-// Role-based redirect: students go to /, admins go to /admin/dashboard
-function RoleBased() {
-  const { role, loading } = useAuth();
-
-  if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
-
-  return <Navigate to={role === 'admin' ? '/admin/dashboard' : '/'} replace />;
 }
 
 export default function App() {
@@ -57,7 +45,7 @@ export default function App() {
             <Route index element={<Dashboard />} />
             <Route path="courses" element={<AvailableCourses />} />
             <Route path="preferences" element={<MyPreferences />} />
-            <Route path="result" element={<AllotmentResult />} />
+            <Route path="allotment" element={<StudentAllotment />} />
             <Route path="enrollments" element={<MyEnrollments />} />
             <Route path="profile" element={<Profile />} />
           </Route>
@@ -108,7 +96,7 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <AdminLayout>
-                  <AdminAllotment />
+                  <AdminAllotmentManagement />
                 </AdminLayout>
               </ProtectedRoute>
             }

@@ -9,7 +9,13 @@
     "start": "node dist/index.js",
     "test": "vitest",
     "lint": "eslint src",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "setup": "tsx scripts/setup-db.ts && tsx scripts/seed-departments.ts && tsx scripts/seed-admin.ts",
+    "setup:db": "tsx scripts/setup-db.ts",
+    "seed:departments": "tsx scripts/seed-departments.ts",
+    "seed:admin": "tsx scripts/seed-admin.ts",
+    "seed:courses": "tsx scripts/seed-courses.ts",
+    "seed": "tsx scripts/seed-departments.ts && tsx scripts/seed-admin.ts && tsx scripts/seed-courses.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

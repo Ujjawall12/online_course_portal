@@ -421,6 +421,7 @@ DROP PROCEDURE IF EXISTS sp_clear_all_data$$
 CREATE PROCEDURE sp_clear_all_data()
 BEGIN
   SET FOREIGN_KEY_CHECKS = 0;
+  TRUNCATE TABLE COURSE_REQUEST;
   TRUNCATE TABLE ENROLLMENT;
   TRUNCATE TABLE PREFERENCE;
   TRUNCATE TABLE ADM_IN_ACCESS;
@@ -431,4 +432,192 @@ BEGIN
   SET FOREIGN_KEY_CHECKS = 1;
 END$$
 
+-- Course Request Procedures
+DROP PROCEDURE IF EXISTS sp_submit_course_request$$
+CREATE PROCEDURE sp_submit_course_request(IN p_roll_no VARCHAR(50), IN p_course_id VARCHAR(50))
+BEGIN
+  DECLARE v_exists INT DEFAULT 0;
+  
+  -- Check if request already pending
+  SELECT COUNT(*) INTO v_exists FROM COURSE_REQUEST 
+  WHERE STUDENT_Roll_No = p_roll_no AND COURSE_Course_ID = p_course_id AND Status = 'pending';
+  
+  IF v_exists > 0 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Request already exists for this course';
+  END IF;
+  
+  -- Check if already enrolled
+  SELECT COUNT(*) INTO v_exists FROM ENROLLMENT 
+  WHERE STUDENT_Roll_No = p_roll_no AND COURSE_Course_ID = p_course_id;
+  
+  IF v_exists > 0 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Student already enrolled in this course';
+  END IF;
+  
+  INSERT INTO COURSE_REQUEST (STUDENT_Roll_No, COURSE_Course_ID, Status)
+  VALUES (p_roll_no, p_course_id, 'pending');
+END$$
+
+DROP PROCEDURE IF EXISTS sp_get_pending_requests$$
+CREATE PROCEDURE sp_get_pending_requests()
+BEGIN
+  SELECT 
+    cr.Request_ID,
+    cr.STUDENT_Roll_No,
+    s.Name as student_name,
+    s.Email as student_email,
+    cr.COURSE_Course_ID,
+    c.Course_Name,
+    c.Credits,
+    c.Faculty,
+    c.Slot,
+    cr.Request_Date,
+    cr.Status
+  FROM COURSE_REQUEST cr
+  JOIN STUDENT s ON cr.STUDENT_Roll_No = s.Roll_No
+  JOIN COURSE c ON cr.COURSE_Course_ID = c.Course_ID
+  WHERE cr.Status = 'pending'
+  ORDER BY cr.Request_Date DESC;
+END$$
+
+DROP PROCEDURE IF EXISTS sp_approve_course_request$$
+CREATE PROCEDURE sp_approve_course_request(IN p_request_id INT, IN p_admin_id INT)
+BEGIN
+  DECLARE v_roll_no VARCHAR(50);
+  DECLARE v_course_id VARCHAR(50);
+  DECLARE v_exists INT DEFAULT 0;
+  
+  -- Get request details
+  SELECT STUDENT_Roll_No, COURSE_Course_ID INTO v_roll_no, v_course_id
+  FROM COURSE_REQUEST WHERE Request_ID = p_request_id;
+  
+  IF v_roll_no IS NULL THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Request not found';
+  END IF;
+  
+  -- Check if already enrolled
+  SELECT COUNT(*) INTO v_exists FROM ENROLLMENT 
+  WHERE STUDENT_Roll_No = v_roll_no AND COURSE_Course_ID = v_course_id;
+  
+  IF v_exists > 0 THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Student already enrolled in this course';
+  END IF;
+  
+  -- Enroll student as allotted
+  INSERT INTO ENROLLMENT (STUDENT_Roll_No, COURSE_Course_ID, Status)
+  VALUES (v_roll_no, v_course_id, 'allotted');
+  
+  -- Update request status
+  UPDATE COURSE_REQUEST 
+  SET Status = 'approved', Approval_Date = NOW(), Approved_By = p_admin_id
+  WHERE Request_ID = p_request_id;
+END$$
+
+DROP PROCEDURE IF EXISTS sp_reject_course_request$$
+CREATE PROCEDURE sp_reject_course_request(IN p_request_id INT, IN p_admin_id INT, IN p_reason VARCHAR(500))
+BEGIN
+  DECLARE v_roll_no VARCHAR(50);
+  
+  -- Get request details
+  SELECT STUDENT_Roll_No INTO v_roll_no
+  FROM COURSE_REQUEST WHERE Request_ID = p_request_id;
+  
+  IF v_roll_no IS NULL THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Request not found';
+  END IF;
+  
+  -- Update request status
+  UPDATE COURSE_REQUEST 
+  SET Status = 'rejected', Approval_Date = NOW(), Approved_By = p_admin_id, Reason = p_reason
+  WHERE Request_ID = p_request_id;
+END$$
+
+DROP PROCEDURE IF EXISTS sp_allot_compulsory_course$$
+CREATE PROCEDURE sp_allot_compulsory_course(IN p_course_id VARCHAR(50), IN p_admin_id INT)
+BEGIN
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE v_roll_no VARCHAR(50);
+  DECLARE v_exists INT DEFAULT 0;
+  
+  DECLARE cur CURSOR FOR 
+    SELECT Roll_No FROM STUDENT WHERE Status = 'active'
+    AND Department_ID = (SELECT Department_ID FROM COURSE WHERE Course_ID = p_course_id);
+  
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+  
+  OPEN cur;
+  
+  loop_label: LOOP
+    FETCH cur INTO v_roll_no;
+    IF done THEN
+      LEAVE loop_label;
+    END IF;
+    
+    -- Check if student already enrolled
+    SELECT COUNT(*) INTO v_exists FROM ENROLLMENT 
+    WHERE STUDENT_Roll_No = v_roll_no AND COURSE_Course_ID = p_course_id;
+    
+    IF v_exists = 0 THEN
+      -- Enroll student as allotted
+      INSERT INTO ENROLLMENT (STUDENT_Roll_No, COURSE_Course_ID, Status)
+      VALUES (v_roll_no, p_course_id, 'allotted');
+    END IF;
+  END LOOP;
+  
+  CLOSE cur;
+END$$
+
+DROP PROCEDURE IF EXISTS sp_get_student_allotted_courses$$
+CREATE PROCEDURE sp_get_student_allotted_courses(IN p_roll_no VARCHAR(50))
+BEGIN
+  SELECT
+    e.COURSE_Course_ID,
+    e.Status,
+    e.Enrollment_Date,
+    c.Course_Name,
+    c.Credits,
+    c.Faculty,
+    c.Slot,
+    c.Capacity,
+    c.Course_Type,
+    c.Course_ID
+  FROM ENROLLMENT e
+  JOIN COURSE c ON e.COURSE_Course_ID = c.Course_ID
+  WHERE e.STUDENT_Roll_No = p_roll_no AND e.Status = 'allotted'
+  ORDER BY c.Course_Type DESC, c.Course_Name ASC;
+END$$
+
+DROP PROCEDURE IF EXISTS sp_get_available_courses_for_request$$
+CREATE PROCEDURE sp_get_available_courses_for_request(IN p_roll_no VARCHAR(50))
+BEGIN
+  DECLARE v_semester INT;
+  DECLARE v_department_id INT;
+  
+  -- Get student's semester and department
+  SELECT Semester, Department_ID INTO v_semester, v_department_id
+  FROM STUDENT WHERE Roll_No = p_roll_no;
+  
+  -- Get courses available for request (those not already enrolled/requested)
+  SELECT
+    c.Course_ID,
+    c.Course_Name,
+    c.Credits,
+    c.Faculty,
+    c.Slot,
+    c.Capacity,
+    c.Course_Type,
+    (SELECT COUNT(*) FROM ENROLLMENT WHERE COURSE_Course_ID = c.Course_ID AND Status = 'allotted') as allotted_count
+  FROM COURSE c
+  WHERE c.Status = 'active'
+    AND c.Semester = v_semester
+    AND c.Department_ID = v_department_id
+    AND c.Course_ID NOT IN (
+      SELECT COURSE_Course_ID FROM ENROLLMENT WHERE STUDENT_Roll_No = p_roll_no
+      UNION
+      SELECT COURSE_Course_ID FROM COURSE_REQUEST WHERE STUDENT_Roll_No = p_roll_no AND Status = 'pending'
+    )
+  ORDER BY c.Course_Type DESC, c.Course_Name ASC;
+END$$
+
 DELIMITER ;
+

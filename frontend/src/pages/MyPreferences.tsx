@@ -3,7 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { GripVertical, Trash2, Clock, AlertCircle } from 'lucide-react';
+import { Trash2, Clock, AlertCircle } from 'lucide-react';
 
 type PrefItem = {
   course_id: string;

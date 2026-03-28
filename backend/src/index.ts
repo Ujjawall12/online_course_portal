@@ -6,6 +6,7 @@ import coursesRoutes from './routes/courses.js';
 import preferencesRoutes from './routes/preferences.js';
 import allotmentsRoutes from './routes/allotments.js';
 import enrollmentsRoutes from './routes/enrollments.js';
+import requestsRoutes from './routes/requests.js';
 import adminRoutes from './routes/admin.js';
 
 const app = express();
@@ -24,6 +25,7 @@ app.use('/preferences', preferencesRoutes);
 app.use('/allotments', allotmentsRoutes);
 app.use('/allotment', allotmentsRoutes); // frontend calls /allotment/result
 app.use('/enrollments', enrollmentsRoutes);
+app.use('/requests', requestsRoutes);
 app.use('/admin', adminRoutes);
 
 app.listen(PORT, () => {

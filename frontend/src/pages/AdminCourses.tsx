@@ -91,6 +91,7 @@ export function AdminCourses() {
   
   // Enrolled students modal
   const [showEnrolledStudents, setShowEnrolledStudents] = useState(false);
+  // @ts-ignore - used for tracking but not directly accessed
   const [selectedCourseForStudents, setSelectedCourseForStudents] = useState<string | null>(null);
   const [enrollmentData, setEnrollmentData] = useState<CourseEnrollmentData | null>(null);
   const [enrollmentLoading, setEnrollmentLoading] = useState(false);

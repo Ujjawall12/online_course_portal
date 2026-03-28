@@ -9,7 +9,7 @@ const nav = [
   { to: '/', end: true, label: 'Dashboard', icon: LayoutDashboard },
   { to: '/courses', end: false, label: 'Available Courses', icon: BookOpen },
   { to: '/preferences', end: false, label: 'My Preferences', icon: ListOrdered },
-  { to: '/result', end: false, label: 'Allotment Result', icon: ClipboardList },
+  { to: '/allotment', end: false, label: 'My Allotment', icon: ClipboardList },
   { to: '/enrollments', end: false, label: 'My Enrollments', icon: GraduationCap },
   { to: '/profile', end: false, label: 'Profile', icon: User },
 ] as const;

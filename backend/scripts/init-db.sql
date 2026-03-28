@@ -94,3 +94,23 @@ CREATE TABLE IF NOT EXISTS ENROLLMENT (
   FOREIGN KEY (STUDENT_Roll_No) REFERENCES STUDENT(Roll_No) ON DELETE CASCADE,
   FOREIGN KEY (COURSE_Course_ID) REFERENCES COURSE(Course_ID) ON DELETE CASCADE
 );
+
+-- 8. COURSE_REQUEST (student course requests and approvals)
+CREATE TABLE IF NOT EXISTS COURSE_REQUEST (
+  Request_ID INT PRIMARY KEY AUTO_INCREMENT,
+  STUDENT_Roll_No VARCHAR(100) NOT NULL,
+  COURSE_Course_ID VARCHAR(20) NOT NULL,
+  Status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+  Request_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  Approval_Date TIMESTAMP NULL,
+  Approved_By INT NULL,
+  Reason VARCHAR(500) DEFAULT NULL,
+  INDEX idx_request_student (STUDENT_Roll_No),
+  INDEX idx_request_course (COURSE_Course_ID),
+  INDEX idx_request_status (Status),
+  INDEX idx_request_date (Request_Date),
+  UNIQUE KEY unique_pending_request (STUDENT_Roll_No, COURSE_Course_ID, Status),
+  FOREIGN KEY (STUDENT_Roll_No) REFERENCES STUDENT(Roll_No) ON DELETE CASCADE,
+  FOREIGN KEY (COURSE_Course_ID) REFERENCES COURSE(Course_ID) ON DELETE CASCADE,
+  FOREIGN KEY (Approved_By) REFERENCES ADMIN(Admin_ID) ON DELETE SET NULL
+);
